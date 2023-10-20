@@ -1,0 +1,269 @@
+<?php
+session_start();
+date_default_timezone_set('Asia/Seoul');
+$conn = new mysqli("localhost", "server", "00000000", "dataset");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/index.css">
+    <script type="text/javascript" src="//code.jquery.com/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="top_bar">
+            <div class="logo">
+                <a class='logo_item' href="/index.html">EAST</a>
+            </div>
+            <div class="menu">
+                <a class='menu_item active' href="/index.html">엑셀</a>
+                <a class='menu_item' href="/page/set1.html">캘린더</a>
+            </div>
+        </div>
+
+        <div class='panel'>
+            <div class='panel_top'>
+                <div class='title'>엑셀 형식으로 보기</div>
+                <button class='add' onclick="addFormOpen()">추가</button>
+            </div>
+            <div class='table'>
+                <div class='th'>
+                    <div class='th_item'>일자</div>
+                    <div class='th_item'>종류</div>
+                    <div class='th_item'>회사명</div>
+                    <div class='th_item'>내용</div>
+                    <div class='th_item'>인원</div>
+                    <div class='th_item'>금액</div>
+                    <div class='th_item'>비고</div>
+                    <div class='th_item'>등록일자</div>
+                    <div class='th_item'>등록시간</div>
+                    <div class='th_item'>관리</div>
+                </div>
+                <?php
+                $sql = "select * from result1 order by id desc";
+                $res = mysqli_query($conn, $sql);
+                for (; $row = mysqli_fetch_array($res);) {
+                    echo " 
+                    <div class='td'>
+                        <div class='td_item date'>" . $row['date'] . "</div>
+                        <div class='td_item type'>" . $row['type'] . "</div>
+                        <div class='td_item company'>" . $row['company'] . "</div>
+                        <div class='td_item contents'>" . $row['contents'] . "</div>
+                        <div class='td_item people'>" . $row['people'] . "</div>
+                        <div class='td_item money'>" . $row['money'] . "</div>
+                        <div class='td_item acc'>" . $row['acc'] . "</div>
+                        <div class='td_item add_date'>" . $row['add_date'] . "</div>
+                        <div class='td_item add_time'>" . $row['add_time'] . "</div>
+                        <div class='td_item'>
+                        <button type='submit' class='edit' onclick='editFormOpen(" . $row['id'] . ")'>수정</button>
+                        <button type='submit' class='del' onclick='delFormOpen(" . $row['id'] . ")'>삭제</button>
+                        </div>
+                    </div>
+                    ";
+                }
+                ?>
+            </div>
+        </div>
+
+        <!-- 오버레이 창 -->
+        <div class="overlay" id="overlay">
+            <!-- //////////////////////////////////////////추가 폼 -->
+            <div class="form-container" id="add_form">
+                <form action="/action/add_data.php" method="post">
+                    <!-- 폼 입력 필드들 추가 -->
+                    <label for="date_add">일자</label>
+                    <input type="date" id="date_add" name="date" value='<?php echo date('Y-m-d'); ?>' required>
+
+                    <label for="type_add">종류</label>
+                    <select name="type" id="type_add" required>
+                        <option value="">==선택==</option>
+                        <option value="출장">출장</option>
+                        <option value="발주">발주</option>
+                        <option value="출고">출고</option>
+                    </select>
+
+                    <label for="company_add">회사명</label>
+                    <input type="text" id="company_add" name="company" required>
+
+                    <label for="contents_add">내용</label>
+                    <input type="text" id="contents_add" name="contents" required>
+
+                    <label for="people_add">인원</label>
+                    <div>
+                        <input type="checkbox" id="kim_add" name="people[]" value="김상배">
+                        <label for="kim">김상배</label>
+
+                        <input type="checkbox" id="lee_add" name="people[]" value="이권용">
+                        <label for="lee">이권용</label>
+
+                        <input type="checkbox" id="lim_add" name="people[]" value="임혜빈">
+                        <label for="lim">임혜빈</label>
+
+                        <input type="checkbox" id="limh_add" name="people[]" value="임홍순">
+                        <label for="limh">임홍순</label>
+
+                        <input type="checkbox" id="choi_add" name="people[]" value="최명길">
+                        <label for="choi">최명길</label>
+                    </div>
+
+                    <label for="money_add">금액</label>
+                    <input type="text" id="money_add" name="money">
+
+                    <label for="acc_add">비고</label>
+                    <input type="text" id="acc_add" name="acc">
+
+
+                    <input type="submit" value="등록">
+                    <input type="button" class="close-btn" onclick="addFormClose()" value="취소">
+                </form>
+            </div>
+
+
+            <!-- //////////////////////////////////////////수정 폼 -->
+            <div class="form-container" id="edit_form">
+                <form action="/action/edit_data.php" method="post">
+                    <!-- 폼 입력 필드들 추가 -->
+                    <!-- 아이디 전달을 위한 히든 input -->
+                    <input type="text" id="id" name="id" required>
+
+                    <label for="date">일자</label>
+                    <input type="date" id="date" name="date" required>
+
+                    <label for="type">종류</label>
+                    <select name="type" id="type">
+                        <option value="0">==선택==</option>
+                        <option value="출장">출장</option>
+                        <option value="발주">발주</option>
+                        <option value="출고">출고</option>
+                    </select>
+
+                    <label for="company">회사명</label>
+                    <input type="text" id="company" name="company" required>
+
+                    <label for="contents">내용</label>
+                    <input type="text" id="contents" name="contents" required>
+
+                    <label for="people">인원</label>
+                    <div>
+                        <input type="checkbox" id="kim" name="people[]" value="김상배">
+                        <label for="kim">김상배</label>
+
+                        <input type="checkbox" id="lee" name="people[]" value="이권용">
+                        <label for="lee">이권용</label>
+
+                        <input type="checkbox" id="lim" name="people[]" value="임혜빈">
+                        <label for="lim">임혜빈</label>
+
+                        <input type="checkbox" id="limh" name="people[]" value="임홍순">
+                        <label for="limh">임홍순</label>
+
+                        <input type="checkbox" id="choi" name="people[]" value="최명길">
+                        <label for="choi">최명길</label>
+                    </div>
+
+                    <label for="money">금액</label>
+                    <input type="text" id="money" name="money">
+
+                    <label for="acc">비고</label>
+                    <input type="text" id="acc" name="acc">
+
+
+                    <input type="submit" value="수정">
+                    <input type="button" class="close-btn" onclick="editFormClose()" value="취소">
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function addFormOpen() {
+                // 추가 오버레이가 열릴 때 체크박스 초기화
+                var checkboxes = document.querySelectorAll("input[name='people[]']");
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.checked = false;
+                });
+
+                document.getElementById("overlay").style.display = "flex";
+                document.getElementById("add_form").style.display = "block";
+                document.getElementById("edit_form").style.display = "none";
+            }
+
+            function addFormClose() {
+                document.getElementById("overlay").style.display = "none";
+            }
+
+            function editFormOpen(id) {
+                // id를 통해 서버에서 데이터 가져오기
+                $.ajax({
+                    type: 'GET',
+                    url: '/action/edit_dataGet.php?id=' + id, // 수정할 데이터를 가져올 서버 경로
+                    dataType: 'json', // 서버에서 전달되는 데이터가 JSON 형식임을 명시
+                    success: function(data) {
+                        // 가져온 JSON 데이터를 폼에 적용
+                        document.getElementById("id").value = data.id;
+                        document.getElementById("date").value = data.date;
+                        document.getElementById("type").value = data.type;
+                        document.getElementById("company").value = data.company;
+                        document.getElementById("contents").value = data.contents;
+                        document.getElementById("money").value = data.money;
+                        document.getElementById("acc").value = data.acc;
+
+                        // 인원 체크박스 처리
+                        var people = data.people.split(', '); // 예: "김상배, 이권용, 임혜빈"
+                        var checkboxes = document.querySelectorAll("input[name='people[]']");
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.checked = people.includes(checkbox.value);
+                        });
+
+                        // 나머지 필드에 대해서도 동일하게 적용
+                        // ...
+
+                        // 수정 창 열기
+                        document.getElementById("overlay").style.display = "flex";
+                        document.getElementById("edit_form").style.display = "block";
+                        document.getElementById("add_form").style.display = "none";
+                    },
+                    error: function(xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+
+
+            function editFormClose() {
+                document.getElementById("overlay").style.display = "none";
+            }
+
+            function delFormOpen(id) {
+                if (confirm("정말로 삭제하시겠습니까?")) {
+                    deleteEvent(id);
+                }
+            }
+
+            function deleteEvent(id) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/action/del_data.php', // 삭제를 처리할 서버 경로
+                    data: {
+                        id: id
+                    }, // 삭제할 데이터의 ID를 전달
+                    success: function(data) {
+                        alert('데이터가 성공적으로 삭제되었습니다.');
+                        location.href = '/index.html';
+                    },
+                    error: function(xhr, status, error) {
+                        alert('데이터 삭제에 실패했습니다.');
+                        location.href = '/index.html';
+                    }
+                });
+            }
+        </script>
+</body>
+
+</html>
